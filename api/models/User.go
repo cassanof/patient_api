@@ -131,7 +131,6 @@ func (u *User) UpdateAUser(db *gorm.DB, uid uint32) (*User, error) {
 			"password":  u.Password,
 			"username":  u.Username,
 			"email":     u.Email,
-			"admin":	 u.Admin,
 		},
 	)
 	if db.Error != nil {
