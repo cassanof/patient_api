@@ -2,12 +2,13 @@ package models
 
 import (
 	"errors"
-	"github.com/badoux/checkmail"
-	"github.com/jinzhu/gorm"
-	"golang.org/x/crypto/bcrypt"
 	"html"
 	"log"
 	"strings"
+
+	"github.com/badoux/checkmail"
+	"github.com/jinzhu/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -15,7 +16,7 @@ type User struct {
 	Username string `gorm:"size:255;not null;unique" json:"username"`
 	Email    string `gorm:"size:100;not null;unique" json:"email"`
 	Password string `gorm:"size:100;not null;" json:"password"`
-	Admin	 bool	`gorm:"default:'false'" json:"admin"`
+	Admin    bool   `gorm:"default:'false'" json:"admin"`
 }
 
 func Hash(password string) ([]byte, error) {
@@ -39,6 +40,7 @@ func (u *User) Prepare() {
 	u.ID = 0
 	u.Username = html.EscapeString(strings.TrimSpace(u.Username))
 	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
+	u.Admin = false
 }
 
 func (u *User) Validate(action string) error {
@@ -128,9 +130,9 @@ func (u *User) UpdateAUser(db *gorm.DB, uid uint32) (*User, error) {
 	}
 	db = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&User{}).UpdateColumns(
 		map[string]interface{}{
-			"password":  u.Password,
-			"username":  u.Username,
-			"email":     u.Email,
+			"password": u.Password,
+			"username": u.Username,
+			"email":    u.Email,
 		},
 	)
 	if db.Error != nil {
