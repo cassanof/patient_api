@@ -15,6 +15,7 @@ type User struct {
 	Username string `gorm:"size:255;not null;unique" json:"username"`
 	Email    string `gorm:"size:100;not null;unique" json:"email"`
 	Password string `gorm:"size:100;not null;" json:"password"`
+	Admin	 bool	`gorm:"default:'false'" json:"admin"`
 }
 
 func Hash(password string) ([]byte, error) {
@@ -130,6 +131,7 @@ func (u *User) UpdateAUser(db *gorm.DB, uid uint32) (*User, error) {
 			"password":  u.Password,
 			"username":  u.Username,
 			"email":     u.Email,
+			"admin":	 u.Admin,
 		},
 	)
 	if db.Error != nil {
