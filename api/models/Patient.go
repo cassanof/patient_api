@@ -63,7 +63,7 @@ func (p *Patient) Validate() error {
 	return nil
 }
 
-func (p *Patient) SavePatient(db *gorm.DB) (*Patient, error) {
+func (p *Patient) CreatePatient(db *gorm.DB) (*Patient, error) {
 	var err error
 	err = db.Debug().Model(&Patient{}).Create(&p).Error
 	if err != nil {
