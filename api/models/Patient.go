@@ -115,9 +115,35 @@ func (p *Patient) FindPatientByID(db *gorm.DB, pat_id uint64) (*Patient, error) 
 	return p, nil
 }
 
-func (p *Patient) DeletePatient(db *gorm.DB, pat_id uint64, user_id uint32) (int64, error) {
+func (p *Patient) UpdateAPatient(db *gorm.DB) (*Patient, error) {
+	var err error
 
-	db = db.Debug().Model(&Patient{}).Where("id = ? and user_id = ?", pat_id, user_id).Take(&Patient{}).Delete(&Patient{})
+	err = db.Debug().Model(&Patient{}).Where("id = ?", p.ID).Updates(Patient{
+		Ethnicity:    p.Ethnicity,
+		CancerDx:     p.CancerDx,
+		CancerDxType: p.CancerDxType,
+		CancerDxAge:  p.CancerDxAge,
+		RelRelation:  p.RelRelation,
+		RelCancer:    p.RelCancer,
+		RelAge:       p.RelAge,
+		Prediction:   p.Prediction,
+	}).Error
+	if err != nil {
+		return &Patient{}, err
+	}
+
+	if p.ID != 0 {
+		err = db.Debug().Model(&User{}).Where("id = ?", p.UserID).Take(&p.User).Error
+		if err != nil {
+			return &Patient{}, err
+		}
+	}
+	return p, nil
+}
+
+func (p *Patient) DeletePatient(db *gorm.DB, pat_id uint64, uid uint32) (int64, error) {
+
+	db = db.Debug().Model(&Patient{}).Where("id = ? and user_id = ?", pat_id, uid).Take(&Patient{}).Delete(&Patient{})
 
 	if db.Error != nil {
 		// if it does not find the Patient
