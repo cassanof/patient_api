@@ -66,6 +66,7 @@ model = keras.models.load_model('probModel')
 
 
 def runIndex(genData, cancerData, ageData):
+    points = 0
     try:
         for index in range(0, len(genData)):
             gNumber = 1.5
@@ -78,9 +79,9 @@ def runIndex(genData, cancerData, ageData):
                             if name in genData[index].lower():
                                 gNumber = generation.genNumber
                                 break
-                        else:
-                            continue
-                        break
+                            else:
+                                continue
+                            break
                 except:
                     gNumber = 1.5
                     errorCount += 1
@@ -91,9 +92,9 @@ def runIndex(genData, cancerData, ageData):
                                 hNumber = cancer.hRisk
                                 avgAge = cancer.avgAge
                                 break
-                        else:
-                            continue
-                        break
+                            else:
+                                continue
+                            break
                 except:
                     hNumber = 0
                     avgAge = 50.0
@@ -146,7 +147,7 @@ class Prediction(Resource):
             np.array(scaler.transform([[ethIndex, index]])))[0]
         pred = np.argmax(matrix)
         pred = pred.item()
-        return {'prediction': float(pred), 'matrix': matrix}
+        return {'prediction': float(pred), 'matrix': matrix.tolist()}
 
 
 # Configuring api
