@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/elleven11/patient_api/api/models"
+	"github.com/elleven11/patient_api/api/responses"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -14,6 +15,10 @@ import (
 type Server struct {
 	DB     *gorm.DB
 	Router *mux.Router
+}
+
+func (srv *Server) Home(w http.ResponseWriter, req *http.Request) {
+	responses.JSON(w, http.StatusOK, "Cancer patient API home page")
 }
 
 func (srv *Server) Init(DbUser, DbPassword, DbPort, DbHost, DbName string) {
