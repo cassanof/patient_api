@@ -42,6 +42,7 @@ func (p *Patient) Prepare() {
 	for i := 0; i < len(p.RelAge); i++ {
 		p.RelAge[i] = html.EscapeString(p.RelAge[i])
 	}
+
 }
 
 func (p *Patient) Validate() error {
