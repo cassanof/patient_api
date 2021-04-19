@@ -1,8 +1,9 @@
-package main
+package controllers
 
 import (
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/elleven11/patient_api/api/models"
 	"github.com/gorilla/mux"
@@ -32,4 +33,11 @@ func (srv *Server) Init(DbUser, DbPassword, DbPort, DbHost, DbName string) {
 	srv.DB.Debug().AutoMigrate(&models.User{}, &models.Patient{})
 
 	srv.Router = mux.NewRouter()
+
+	srv.initRoutes()
+}
+
+func (srv *Server) Run(addr string) {
+	fmt.Println("Listening to port 8080")
+	log.Fatal(http.ListenAndServe(addr, srv.Router))
 }
