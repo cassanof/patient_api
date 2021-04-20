@@ -15,7 +15,8 @@ func (srv *Server) initRoutes() {
 	srv.Router.HandleFunc("/users/{id}", middlewares.SetAuth(srv.DeleteUser)).Methods("DELETE")
 
 	// Patients
-	srv.Router.HandleFunc("/patients", middlewares.SetJSON(srv.CreatePatient)).Methods("POST")
+	srv.Router.HandleFunc("/patients", middlewares.SetJSON(middlewares.SetAuth(srv.CreatePatient))).Methods("POST")
+	// can only access /patients
 	srv.Router.HandleFunc("/patients", middlewares.SetJSON(middlewares.SetAuth(srv.GetPatients))).Methods("GET")
 	srv.Router.HandleFunc("/patients/{id}", middlewares.SetJSON(middlewares.SetAuth(srv.GetPatient))).Methods("GET")
 	srv.Router.HandleFunc("/patients/{id}", middlewares.SetJSON(middlewares.SetAuth(srv.UpdatePatient))).Methods("PUT")
