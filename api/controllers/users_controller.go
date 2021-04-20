@@ -50,9 +50,28 @@ func (srv *Server) CreateUser(w http.ResponseWriter, req *http.Request) {
 
 func (srv *Server) GetUsers(w http.ResponseWriter, req *http.Request) {
 
-	user := models.User{}
+	tokenID, err := auth.TokenExtractTokenID(req)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
 
-	users, err := user.FindAllUsers(srv.DB)
+	user_req := models.User{}
+
+	userRcv, err := user_req.FindUserByID(srv.DB, tokenID)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if !userRcv.Admin {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	user_res := models.User{}
+
+	users, err := user_res.FindAllUsers(srv.DB)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
@@ -62,18 +81,44 @@ func (srv *Server) GetUsers(w http.ResponseWriter, req *http.Request) {
 
 func (srv *Server) GetUser(w http.ResponseWriter, req *http.Request) {
 
+	tokenID, err := auth.TokenExtractTokenID(req)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
 	vars := mux.Vars(req)
 	uid, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
-	user := models.User{}
-	userGotten, err := user.FindUserByID(srv.DB, uint32(uid))
+
+	user_req := models.User{}
+
+	userRcv, err := user_req.FindUserByID(srv.DB, tokenID)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
+
+	user_res := models.User{}
+
+	userGotten, err := user_res.FindUserByID(srv.DB, uint32(uid))
+	if err != nil {
+		fmt.Println(uid)
+		fmt.Println(err)
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if tokenID != userGotten.ID {
+		if !userRcv.Admin {
+			responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			return
+		}
+	}
+
 	responses.JSON(w, http.StatusOK, userGotten)
 }
 
@@ -131,14 +176,24 @@ func (srv *Server) DeleteUser(w http.ResponseWriter, req *http.Request) {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
 	}
+
 	tokenID, err := auth.TokenExtractTokenID(req)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
-	if tokenID != 0 && tokenID != uint32(uid) {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+
+	userRcv, err := user.FindUserByID(srv.DB, tokenID)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
 		return
+	}
+
+	if tokenID != 0 && tokenID != uint32(uid) {
+		if !userRcv.Admin {
+			responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+			return
+		}
 	}
 	_, err = user.DeleteAUser(srv.DB, uint32(uid))
 	if err != nil {
