@@ -103,6 +103,14 @@ func (srv *Server) GetPatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	user := models.User{}
+
+	userRcv, err := user.FindUserByID(srv.DB, uid)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	patient := models.Patient{}
 
 	patientRecv, err := patient.FindPatientByID(srv.DB, pat_id)
@@ -111,7 +119,7 @@ func (srv *Server) GetPatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if uid != patientRecv.UserID {
+	if uid != patientRecv.UserID || !userRcv.Admin {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
@@ -136,6 +144,14 @@ func (srv *Server) UpdatePatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	user := models.User{}
+
+	userRcv, err := user.FindUserByID(srv.DB, uid)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	patient := models.Patient{}
 	err = srv.DB.Debug().Model(models.Patient{}).Where("id = ?", pat_id).Take(&patient).Error
 	if err != nil {
@@ -143,7 +159,7 @@ func (srv *Server) UpdatePatient(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// to defeat spooky men trying to update patients that are not theirs
-	if uid != patient.UserID {
+	if !userRcv.Admin || (uid != patient.UserID && !userRcv.Admin) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
@@ -163,7 +179,6 @@ func (srv *Server) UpdatePatient(w http.ResponseWriter, req *http.Request) {
 
 	// just double checking also the updated patient
 	if uid != patientUpdate.UserID {
-		fmt.Printf("uid and updated patient's uid mismatch:\nuid: %v\nupd_patient uid: %v\n", uid, patientUpdate.UserID)
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
@@ -204,6 +219,14 @@ func (srv *Server) DeletePatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	user := models.User{}
+
+	userRcv, err := user.FindUserByID(srv.DB, uid)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	patient := models.Patient{}
 
 	err = srv.DB.Debug().Model(models.Patient{}).Where("id = ?", pat_id).Take(&patient).Error
@@ -212,7 +235,7 @@ func (srv *Server) DeletePatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if uid != patient.UserID {
+	if !userRcv.Admin || (uid != patient.UserID && !userRcv.Admin) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
