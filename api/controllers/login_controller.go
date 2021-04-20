@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -37,6 +38,7 @@ func (srv *Server) Login(w http.ResponseWriter, req *http.Request) {
 	token, err := srv.SignIn(user.Email, user.Password)
 	if err != nil {
 		fmtError := utils.FormatError(err.Error())
+		fmt.Println(err)
 		responses.ERROR(w, http.StatusUnprocessableEntity, fmtError)
 		return
 	}
@@ -59,5 +61,6 @@ func (srv *Server) SignIn(email, password string) (string, error) {
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err
 	}
+
 	return auth.TokenCreate(user.ID)
 }
