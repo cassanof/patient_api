@@ -78,11 +78,22 @@ func (srv *Server) GetPatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	uid, err := auth.TokenExtractTokenID(req)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
 	patient := models.Patient{}
 
 	patientRecv, err := patient.FindPatientByID(srv.DB, pat_id)
 	if err != nil {
 		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if uid != patientRecv.UserID {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
 
@@ -101,6 +112,7 @@ func (srv *Server) UpdatePatient(w http.ResponseWriter, req *http.Request) {
 
 	uid, err := auth.TokenExtractTokenID(req)
 	if err != nil {
+		fmt.Printf("id extraction error: %v\n", err)
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
@@ -132,6 +144,7 @@ func (srv *Server) UpdatePatient(w http.ResponseWriter, req *http.Request) {
 
 	// just double checking also the updated patient
 	if uid != patientUpdate.UserID {
+		fmt.Printf("uid and updated patient's uid mismatch:\nuid: %v\nupd_patient uid: %v\n", uid, patientUpdate.UserID)
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
