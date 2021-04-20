@@ -20,6 +20,6 @@ func (srv *Server) initRoutes() {
 	srv.Router.HandleFunc("/patients", middlewares.SetJSON(middlewares.SetAuth(srv.GetPatients))).Methods("GET")
 	srv.Router.HandleFunc("/patients/{id}", middlewares.SetJSON(middlewares.SetAuth(srv.GetPatient))).Methods("GET")
 	srv.Router.HandleFunc("/patients/{id}", middlewares.SetJSON(middlewares.SetAuth(srv.UpdatePatient))).Methods("PUT")
-	srv.Router.HandleFunc("/patients/{id}", middlewares.SetAuth(srv.DeleteUser)).Methods("DELETE")
+	srv.Router.HandleFunc("/patients/{id}", middlewares.SetAuth(srv.DeletePatient)).Methods("DELETE")
 
 }
