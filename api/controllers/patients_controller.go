@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +15,36 @@ import (
 	"github.com/elleven11/patient_api/api/utils"
 	"github.com/gorilla/mux"
 )
+
+func ReqPrediction(patient *models.Patient) (float64, error) {
+
+	reqBody, err := json.Marshal(patient)
+	if err != nil {
+		return -1, err
+	}
+
+	res, err := http.Post("http://localhost:5000/api", "application/json", bytes.NewBuffer(reqBody))
+	if err != nil {
+		return -1, err
+	}
+
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return -1, err
+	}
+
+	bodyParse := make(map[string]interface{})
+	err = json.Unmarshal(body, &bodyParse)
+	if err != nil {
+		return -1, err
+	}
+
+	prediction := fmt.Sprintf("%v", bodyParse["prediction"])
+
+	return strconv.ParseFloat(prediction, 64)
+}
 
 func (srv *Server) CreatePatient(w http.ResponseWriter, req *http.Request) {
 
@@ -48,12 +79,19 @@ func (srv *Server) CreatePatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	patient.Prediction, err = ReqPrediction(&patient)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, errors.New("Error making prediction"))
+		return
+	}
+
 	patientCreated, err := patient.CreatePatient(srv.DB)
 	if err != nil {
 		fmtError := utils.FormatError(err.Error())
 		responses.ERROR(w, http.StatusInternalServerError, fmtError)
 		return
 	}
+
 	w.Header().Set("Location", fmt.Sprintf("%s%s/%d", req.Host, req.URL.Path, patientCreated.ID))
 	responses.JSON(w, http.StatusCreated, patientCreated)
 }
@@ -195,6 +233,12 @@ func (srv *Server) UpdatePatient(w http.ResponseWriter, req *http.Request) {
 	}
 
 	patientUpdate.ID = patient.ID
+
+	patientUpdate.Prediction, err = ReqPrediction(&patientUpdate)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, errors.New("Error making prediction"))
+		return
+	}
 
 	patientUpdated, err := patientUpdate.UpdateAPatient(srv.DB)
 	if err != nil {
