@@ -45,6 +45,7 @@ func (srv *Server) CreatePatient(w http.ResponseWriter, req *http.Request) {
 	}
 	if uid != patient.UserID {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
 	}
 
 	patientCreated, err := patient.CreatePatient(srv.DB)
