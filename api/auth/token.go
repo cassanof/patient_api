@@ -20,7 +20,13 @@ func TokenCreate(user_id uint32) (string, error) {
 	// making token expire after a day
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("API_SECRET")))
+	tk1, err := token.SignedString([]byte(os.Getenv("API_SECRET")))
+	// TODO: fix this trashbag
+	if err != nil {
+		fmt.Println("API_SECRET: " + os.Getenv("API_SECRET"))
+		fmt.Println("fugg: " + err.Error())
+	}
+	return tk1, err
 }
 
 func TokenValidate(req *http.Request) error {
