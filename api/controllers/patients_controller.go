@@ -75,6 +75,7 @@ func (srv *Server) GetPatients(w http.ResponseWriter, req *http.Request) {
 
 	if !userRcv.Admin {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
 	}
 
 	patient := models.Patient{}
