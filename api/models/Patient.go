@@ -141,9 +141,9 @@ func (p *Patient) UpdateAPatient(db *gorm.DB) (*Patient, error) {
 	return p, nil
 }
 
-func (p *Patient) DeletePatient(db *gorm.DB, pat_id uint64, uid uint32) (int64, error) {
+func (p *Patient) DeletePatient(db *gorm.DB, pat_id uint64) (int64, error) {
 
-	db = db.Debug().Model(&Patient{}).Where("id = ? and user_id = ?", pat_id, uid).Take(&Patient{}).Delete(&Patient{})
+	db = db.Debug().Model(&Patient{}).Where("id = ?", pat_id).Take(&Patient{}).Delete(&Patient{})
 
 	if db.Error != nil {
 		// if it does not find the Patient

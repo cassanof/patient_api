@@ -240,7 +240,7 @@ func (srv *Server) DeletePatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, err = patient.DeletePatient(srv.DB, pat_id, uid)
+	_, err = patient.DeletePatient(srv.DB, pat_id)
 	if err != nil {
 		responses.ERROR(w, http.StatusBadRequest, err)
 		return
