@@ -16,10 +16,10 @@ func (srv *Server) initRoutes() {
 
 	// GET all users
 	// NOTE: only admins can GET /users
-	srv.Router.HandleFunc("/users", middlewares.SetJSON(srv.GetUsers)).Methods("GET")
+	srv.Router.HandleFunc("/users", middlewares.SetJSON(middlewares.SetAuth(srv.GetUsers))).Methods("GET")
 
 	// GET an user (needs to be admin or user itself)
-	srv.Router.HandleFunc("/users/{id}", middlewares.SetJSON(srv.GetUser)).Methods("GET")
+	srv.Router.HandleFunc("/users/{id}", middlewares.SetJSON(middlewares.SetAuth(srv.GetUser))).Methods("GET")
 
 	// Update an user with a PUT request (needs to be the user itself or admin)
 	srv.Router.HandleFunc("/users/{id}", middlewares.SetJSON(middlewares.SetAuth(srv.UpdateUser))).Methods("PUT")
