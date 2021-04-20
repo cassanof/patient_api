@@ -58,6 +58,24 @@ func (srv *Server) CreatePatient(w http.ResponseWriter, req *http.Request) {
 }
 
 func (srv *Server) GetPatients(w http.ResponseWriter, req *http.Request) {
+	uid, err := auth.TokenExtractTokenID(req)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	user := models.User{}
+
+	userRcv, err := user.FindUserByID(srv.DB, uid)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if !userRcv.Admin {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+	}
+
 	patient := models.Patient{}
 
 	patients, err := patient.FindAllPatients(srv.DB)
