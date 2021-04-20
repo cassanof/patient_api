@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -26,6 +25,8 @@ func TokenCreate(user_id uint32) (string, error) {
 
 func TokenValidate(req *http.Request) error {
 	tokenString := TokenExtract(req)
+	fmt.Printf("got token: %s\n", tokenString)
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// checking signing algo
 		// https://stackoverflow.com/questions/56663542/verify-jwt-token-signature
@@ -78,8 +79,8 @@ func TokenExtract(req *http.Request) string {
 
 	// can extract token from header if not in URL
 	bToken := req.Header.Get("Authorization")
-	if len(strings.Split(bToken, "")) == 2 {
-		return strings.Split(bToken, " ")[1]
+	if bToken != "" {
+		return bToken
 	}
 
 	// return this if nothing else has token
