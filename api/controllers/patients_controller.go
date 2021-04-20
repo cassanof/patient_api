@@ -119,9 +119,11 @@ func (srv *Server) GetPatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if uid != patientRecv.UserID || !userRcv.Admin {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
+	if uid != patientRecv.UserID {
+		if !userRcv.Admin {
+			responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			return
+		}
 	}
 
 	responses.JSON(w, http.StatusOK, patientRecv)
@@ -235,9 +237,11 @@ func (srv *Server) DeletePatient(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if !userRcv.Admin || (uid != patient.UserID && !userRcv.Admin) {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
+	if uid != patient.UserID {
+		if !userRcv.Admin {
+			responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			return
+		}
 	}
 
 	_, err = patient.DeletePatient(srv.DB, pat_id)
