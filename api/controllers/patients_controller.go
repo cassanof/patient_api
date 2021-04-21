@@ -67,6 +67,7 @@ func (srv *Server) CreatePatient(w http.ResponseWriter, req *http.Request) {
 	err = patient.Validate()
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
 	}
 
 	uid, err := auth.TokenExtractTokenID(req)
