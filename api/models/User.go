@@ -16,7 +16,7 @@ type User struct {
 	Username string `gorm:"size:255;not null;unique" json:"username"`
 	Email    string `gorm:"size:100;not null;unique" json:"email"`
 	Password string `gorm:"size:100;not null;" json:"password"`
-	Admin    bool   `gorm:"default:'false'" json:"admin"`
+	Admin    bool   `gorm:"default:false" json:"admin"`
 }
 
 func Hash(password string) ([]byte, error) {
