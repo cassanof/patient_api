@@ -37,8 +37,8 @@ func (srv *Server) initRoutes() {
 	// Create patients
 	srv.Router.HandleFunc("/patients", middlewares.SetJSON(middlewares.SetAuth(srv.CreatePatient))).Methods("POST")
 
-	// GET all patients
-	// NOTE: only admins can GET /patients
+	// GET all patients that the user owns
+	// NOTE: if admins GET /patients they can return all patients of all users
 	srv.Router.HandleFunc("/patients", middlewares.SetJSON(middlewares.SetAuth(srv.GetPatients))).Methods("GET")
 
 	// GET one patient by id (needs to be owner or admin)
