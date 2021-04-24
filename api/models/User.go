@@ -38,7 +38,7 @@ func (u *User) BeforeCreate() error {
 
 func (u *User) Prepare() {
 	u.ID = 0
-	u.Username = html.EscapeString(strings.TrimSpace(u.Username))
+	u.Username = html.EscapeString(u.Username)
 	u.Email = html.EscapeString(strings.TrimSpace(u.Email))
 	u.Admin = false
 }
