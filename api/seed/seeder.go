@@ -31,6 +31,7 @@ var patients = []models.Patient{
 		RelRelation:  pq.StringArray{"Mother", "Father"},
 		RelCancer:    pq.StringArray{"Lung", "Breast"},
 		RelAge:       pq.StringArray{"44", "55"},
+		Active:       1,
 		Prediction:   -1,
 	},
 	{
@@ -39,6 +40,7 @@ var patients = []models.Patient{
 		RelRelation: pq.StringArray{"Grandfather"},
 		RelCancer:   pq.StringArray{"Lung"},
 		RelAge:      pq.StringArray{"74"},
+		Active:      0,
 		Prediction:  -1,
 	},
 }
