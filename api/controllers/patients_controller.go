@@ -112,18 +112,25 @@ func (srv *Server) GetPatients(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if !userRcv.Admin {
-		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		return
-	}
-
 	patient := models.Patient{}
+	var patients *[]models.Patient
 
-	patients, err := patient.FindAllPatients(srv.DB)
-	if err != nil {
-		responses.ERROR(w, http.StatusInternalServerError, err)
-		return
+	if !userRcv.Admin {
+		// gets patients of the user
+		patients, err = patient.FindAllPatientsOfUid(srv.DB, uid)
+		if err != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err)
+			return
+		}
+	} else {
+		// gets all patients for all users
+		patients, err = patient.FindAllPatients(srv.DB)
+		if err != nil {
+			responses.ERROR(w, http.StatusInternalServerError, err)
+			return
+		}
 	}
+
 	responses.JSON(w, http.StatusOK, patients)
 }
 
