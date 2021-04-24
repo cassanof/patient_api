@@ -18,6 +18,7 @@ type Patient struct {
 	RelCancer    pq.StringArray `gorm:"type:text[]" json:"rel_cancer"`
 	RelAge       pq.StringArray `gorm:"type:text[]" json:"rel_age"`
 	Prediction   float64        `json:"prediction"`
+	Active       int8           `gorm:"default:0" json:"active"`
 	User         User           `json:"user"`
 	UserID       uint32         `gorm:"not null" json:"user_id"`
 }
@@ -99,6 +100,26 @@ func (p *Patient) FindAllPatients(db *gorm.DB) (*[]Patient, error) {
 	return &patients, nil
 }
 
+func (p *Patient) FindAllPatientsOfUid(db *gorm.DB, uid uint32) (*[]Patient, error) {
+	var err error
+	patients := []Patient{}
+
+	err = db.Debug().Model(&Patient{}).Where("user_id = ?", uid).Find(&patients).Limit(100).Error
+	if err != nil {
+		return &[]Patient{}, err
+	}
+
+	if len(patients) > 0 {
+		for i, _ := range patients {
+			err := db.Debug().Model(&User{}).Where("id = ?", patients[i].UserID).Take(&patients[i].User).Error
+			if err != nil {
+				return &[]Patient{}, err
+			}
+		}
+	}
+	return &patients, nil
+}
+
 func (p *Patient) FindPatientByID(db *gorm.DB, pat_id uint64) (*Patient, error) {
 	var err error
 
@@ -126,6 +147,7 @@ func (p *Patient) UpdateAPatient(db *gorm.DB) (*Patient, error) {
 		RelRelation:  p.RelRelation,
 		RelCancer:    p.RelCancer,
 		RelAge:       p.RelAge,
+		Active:       p.Active,
 		Prediction:   p.Prediction,
 	}).Error
 	if err != nil {
